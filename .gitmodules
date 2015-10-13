@@ -1,0 +1,3 @@
+[submodule "racing_aggregator"]
+	path = racing_aggregator
+	url = git@github.com:javide/racing_aggregator.git
