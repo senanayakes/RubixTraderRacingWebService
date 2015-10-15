@@ -13,11 +13,15 @@
  */
 
 use Phalcon\Mvc\Model;
+use Phalcon\Mvc\Model\Message;
+use Phalcon\Mvc\Model\Validator\Uniqueness;
 
 
-class event extends  Model{
+class market extends  Model{
 
 
+	public function getMarket($event_id) {
 
+	}
 
 }

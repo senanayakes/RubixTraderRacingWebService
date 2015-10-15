@@ -14,10 +14,6 @@
 
 use Phalcon\Mvc\Model;
 
-
-class event extends  Model{
-
-
-
+class source extends Model{
 
 }

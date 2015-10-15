@@ -3,12 +3,15 @@
 sudo apt-get update
 
 #variables
-racingSqlDumpFile='rubixtrader_racing.sql';
 dbPassword='password'
 racingDatabase='rubixtrader_racing'
-racingMysqlDumpZIPFolder='rubixtrader_racing.sql'
+databaseSetupInfoBranch='Bx_aggregator'
+schemaSql='schema.sql'
+staticDataSql='static_data.sql'
+testDataSql='test_data.sql'
 
-sudo apt-get -y install unzip
+
+sudo apt-get -y install git
 
 sudo apt-get install php5 libapache2-mod-php5 php5-mcrypt php5-mysql
 sudo  php5enmod mcrypt
@@ -27,10 +30,15 @@ function createDB {
     echo "creating the database $1"
     mysql -uroot -p$dbPassword -e "CREATE DATABASE $1;"
     echo "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;FLUSH PRIVILEGES;" | mysql -uroot -p$dbPassword
-    echo "importing data sql file $2"
-    mysql -uroot -p$dbPassword  $1 < $2
+
 }
 
+
+function importData {
+echo "importing file $1"
+mysql -uroot -p$dbPassword  $racingDatabase < $1
+
+}
 
 
 
@@ -62,10 +70,15 @@ sudo apt-get -y install mysql-server phpmyadmin
 #sudo apt-get -y install unzip
 
 
-cd /vagrant/vagrant-data
-unzip "$racingMysqlDumpZIPFolder.zip"
-createDB $racingDatabase  "$racingSqlDumpFile"
-sudo rm -R -f $racingSqlDumpFile
+
+echo "=========================setting up the database $racingDatabase======================================="
+createDB $racingDatabase
+cd /vagrant/racing_aggregator/db/mariadb
+git checkout $databaseSetupInfoBranch
+importData $schemaSql
+importData $staticDataSql
+importData $testDataSql
+echo "========================================================================================================"
 
 
 sudo cp /vagrant/vagrant-data/000-default.conf  /etc/apache2/sites-available/000-default.conf

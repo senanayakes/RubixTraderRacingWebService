@@ -14,10 +14,11 @@
 
 use Phalcon\Mvc\Model;
 
+class venueAlias extends  Model{
 
-class event extends  Model{
-
-
-
+	public function getSource()
+	{
+		return 'venue_alias'; // name of db table here
+	}
 
 }
