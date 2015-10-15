@@ -68,13 +68,9 @@ $app->options('/{catch:(.*)}', function() use ($app) {
 
 
 
-
-
 $app->get('/api', function() use ($app, $response) {
-
 	$data = array('rubix trader racing mock api');
 	$response->send(200, 'ok', $data);
-
 
 });
 
@@ -132,8 +128,9 @@ $app->get('/api/categories/{category_name:[a-z]*}', function($category_name) use
 
 		$sport_id = $sports[$category_name];
 
-		$sql = "SELECT m.* ,  v.* , s.*, va.*, f.*
+		$sql = "SELECT m.* ,  v.* , s.*, va.*, f.* , *
 				FROM meeting AS m
+				LEFT JOIN event AS e ON e.event_id = m.event_id
 				INNER JOIN venue AS v ON v.venue_id = m.venue_id
 				INNER JOIN sport AS s ON s.sport_id = v.sport_id
 				LEFT JOIN venueAlias AS va on va.venue_id = v.venue_id
@@ -313,10 +310,54 @@ $app->get('/api/event/{event_id:[0-9]*}', function($event_id) use ($app, $respon
 	}
 
 
+	$sql = "SELECT * FROM poolType";
+	$poolTypeResult = $app->modelsManager->executeQuery($sql);
+
+	$poolTypes = array();
+
+	foreach ($poolTypeResult as $poolType) {
+		$poolTypes[] = array(
+			'pool_type_id' =>  $poolType-> pool_type_id,
+			'pool_type_name'=> $poolType->name
+
+		);
+
+	}
+
+	$sql = "SELECT pe . * , p . * , pt . *, s.*
+			FROM poolEvents AS pe
+			INNER JOIN pool AS p ON p.pool_id = pe.pool_id
+			INNER JOIN poolType AS pt ON pt.pool_type_id = p.pool_type_id
+			INNER JOIN source AS s ON s.source_id = p.source_id
+			WHERE pe.event_id = $event_id";
+
+
+	$eventPoolsResult = $app->modelsManager->executeQuery($sql);
+	$eventPools = array();
+	foreach ($eventPoolsResult as $eventPool) {
+		$eventPools[] = array(
+			'pool_id'=> $eventPool->pe->pool_id,
+			'pool_type_id'=> $eventPool->p->pool_type_id,
+			'pool_type_name'=> $eventPool->pt->name,
+			'substitute' => $eventPool->pe->substitute,
+			'source_id'=> $eventPool->p->source_id,
+			'pool_status'=> $eventPool->p->pool_status,
+			'total'=> $eventPool->p->total,
+			'source_id' => $eventPool->s->source_id,
+			'source_name'=> $eventPool->s->name
+
+
+		);
+
+	}
+
+
 	//get pool details
 
 	$data['markets'] = array_unique($markets, SORT_NUMERIC);
 	$data['contestants'] = $contestants;
+	$data['all_pool_types'] = $poolTypes;
+	$data['event_pool_types'] = $eventPools;
 	$response->send($code, $responseText, $data);
 });
 
@@ -334,7 +375,8 @@ $app->get('/api/price/sources', function($event_id) use ($app, $response) {
 	foreach ($results as $row) {
 		$data[] = array(
 			'source_id' => $row->source_id,
-			'source_name'=> $row->name
+			'source_name'=> $row->name,
+			'pool_status'=> $row->pool_status
 		);
 	}
 
