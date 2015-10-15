@@ -130,7 +130,6 @@ $app->get('/api/categories/{category_name:[a-z]*}', function($category_name) use
 
 		$sql = "SELECT m.* ,  v.* , s.*, va.*, f.* , *
 				FROM meeting AS m
-				LEFT JOIN event AS e ON e.event_id = m.event_id
 				INNER JOIN venue AS v ON v.venue_id = m.venue_id
 				INNER JOIN sport AS s ON s.sport_id = v.sport_id
 				LEFT JOIN venueAlias AS va on va.venue_id = v.venue_id
