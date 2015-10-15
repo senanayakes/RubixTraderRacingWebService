@@ -285,6 +285,7 @@ $app->get('/api/event/{event_id:[0-9]*}', function($event_id) use ($app, $respon
 			if (!empty($contestant_id)) {
 				$contestants[] = array(
 					'contestant_id' => $contestant_id,
+					'name' => $row->c->name,
 					'runner_num'=> $row->c->runner_num,
 					'barrier' => $row->c->barrier,
 					'status'=> $row->c->status,
