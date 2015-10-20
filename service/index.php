@@ -68,7 +68,7 @@ $app->options('/{catch:(.*)}', function() use ($app) {
 
 
 
-$app->get('/api', function() use ($app, $response) {
+$app->get('/', function() use ($app, $response) {
 	$data = array('rubix trader racing mock api');
 	$response->send(200, 'ok', $data);
 
@@ -76,7 +76,7 @@ $app->get('/api', function() use ($app, $response) {
 
 
 //get all venue information
-$app->get('/api/venues', function() use ($app, $response) {
+$app->get('/venues', function() use ($app, $response) {
 
 	$sql = "SELECT v.*, s.*, f.*, va.*
 			FROM venue AS v
@@ -113,7 +113,7 @@ $app->get('/api/venues', function() use ($app, $response) {
 
 
 //get meetings for a sport
-$app->get('/api/categories/{category_name:[a-z]*}', function($category_name) use ($app, $response) {
+$app->get('/categories/{category_name:[a-z]*}', function($category_name) use ($app, $response) {
 
 	$sports = array('horse'=> 1,
 					'greyhound'=> 2,
@@ -166,7 +166,7 @@ $app->get('/api/categories/{category_name:[a-z]*}', function($category_name) use
 
 
 //get all events for a meeting
-$app->get('/api/events/{meeting_id:[0-9]*}', function($meeting_id) use ($app, $response) {
+$app->get('/events/{meeting_id:[0-9]*}', function($meeting_id) use ($app, $response) {
 
 	$meeting_id = (int) $meeting_id;
 	$code = 200;
@@ -222,7 +222,7 @@ $app->get('/api/events/{meeting_id:[0-9]*}', function($meeting_id) use ($app, $r
 
 
 //get all events for a meeting
-$app->get('/api/event/{event_id:[0-9]*}', function($event_id) use ($app, $response) {
+$app->get('/event/{event_id:[0-9]*}', function($event_id) use ($app, $response) {
 
 	$code = 200;
 	$responseText = 'ok';
@@ -365,7 +365,7 @@ $app->get('/api/event/{event_id:[0-9]*}', function($event_id) use ($app, $respon
 /**
  * get all the price sources
  */
-$app->get('/api/price/sources', function($event_id) use ($app, $response) {
+$app->get('/price/sources', function($event_id) use ($app, $response) {
 
 	$code = 200;
 	$responseText = 'ok';
