@@ -385,6 +385,79 @@ $app->get('/price/sources', function($event_id) use ($app, $response) {
 });
 
 
+$app->put('/feed/config', function() use ($app, $response) {
+
+	$code = 200;
+	$responseText = 'ok';
+	$requestdata = $app->request->getJsonRawBody(true);
+	foreach ($requestdata as $row) {
+		$alias = $row['aliases'];
+		$venue_id = isset($row['venue_id']) ?: $row['venue_id'];
+
+
+
+	}
+
+
+
+
+	$data = array('result'=> 'successful');
+	$response->send($code, $responseText, $data);
+
+});
+
+
+/**
+ * fetch all racing venues
+ */
+$app->get('/api/venues/{sports_id:[0-9]*}', function($sport_id) use ($app, $response) {
+	$code = 200;
+	$responseText = 'ok';
+	$data = array();
+	$sql = "SELECT * FROM venue WHERE sport_id = " . (int)$sport_id;
+
+	$results = $app->modelsManager->executeQuery($sql);
+	foreach ($results as $row) {
+		$data[] = array(
+			'venue_id' => $row->venue_id,
+			'name' => $row->name
+		);
+	}
+	$response->send($code, $responseText, $data);
+});
+
+
+/**
+* fetch feed venue settings
+*/
+$app->get('/api/feed/venue/{venue_id:[0-9]*}', function($venue_id) use ($app, $response) {
+
+	$code = 200;
+	$responseText = 'ok';
+	$data = array();
+	$sql = "SELECT va.venue_id, va.venue_alias_id, va.feed_id, va.name, f.name as feed_name, fvp.priority FROM venueAlias va
+         LEFT JOIN feed f ON (va.feed_id = f.feed_id)
+         LEFT JOIN feedVenuePriority fvp ON (va.feed_id = fvp.feed_id AND va.venue_id = fvp.venue_id)
+         WHERE va.venue_id = " . (int) $venue_id;
+
+	$results = $app->modelsManager->executeQuery($sql);
+
+	foreach ($results as $row) {
+
+		$data[] = array(
+			'venue_id' => $row->venue_id,
+			'venue_alias_id' => $row->venue_alias_id,
+			'feed_id' => $row->feed_id,
+			'feed_name' => $row->feed_name,
+			'name' => $row->name,
+			'priority' => $row->priority
+		);
+	}
+
+	$response->send($code, $responseText, $data);
+});
+
+
 
 
 $app->notFound(function () use ($app, $response) {
