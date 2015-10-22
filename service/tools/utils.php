@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Name goes here
  * Description goes here
@@ -11,13 +12,20 @@
  * @license This code is copyrighted and is the exclusive property of Tabcorp Pty Ltd. It may not be used, copied or redistributed without the written permission of Tabcorp.
  */
 
+namespace RubixTraderRacingWebService\Tools;
 
 
+class Utils {
 
 
-$dbname = 'rubixtrader_racing';
-$dbuser = 'root';
-$password ='password';
+	public function index_set_strict(&$array, $index, $default = false) {
+
+		if (is_array($array)) {
+			return (isset($array[$index]) && $array[$index] !== null) ? $array[$index] : $default;
+		}
+
+		return $default;
+	}
 
 
-include_once  __DIR__ . DIRECTORY_SEPARATOR .'tools'. DIRECTORY_SEPARATOR . 'utils.php';
+}

@@ -12,11 +12,11 @@
  * @license This code is copyrighted and is the exclusive property of Tabcorp Pty Ltd. It may not be used, copied or redistributed without the written permission of Tabcorp.
  */
 
-namespace MockAPI\Response;
+namespace RubixTraderRacingWebService\Response;
 
 use Phalcon\Http\Response;
 
-class MockAPIResponse {
+class APIResponse {
 
 	private $response;
 
