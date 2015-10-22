@@ -38,10 +38,10 @@ $di = new FactoryDefault();///
 $di->set('db', function () {
 	return new\Phalcon\Db\Adapter\Pdo\Mysql(
 		array(
-			"host"     => "localhost",
-			"username" => "root",
-			"password" => "password",
-			"dbname"   => "rubixtrader_racing"
+			"host"     => DATABASE_HOST,
+			"username" => DATABASE_USER,
+			"password" => DATABASE_PASSWORD,
+			"dbname"   => DATABASE_NAME
 		)
 	);
 });

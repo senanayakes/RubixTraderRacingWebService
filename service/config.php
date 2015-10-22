@@ -15,9 +15,11 @@
 
 
 
-$dbname = 'rubixtrader_racing';
-$dbuser = 'root';
-$password ='password';
 
+
+define("DATABASE_NAME","rubixtrader_racing");
+define("DATABASE_USER","root");
+define("DATABASE_PASSWORD","password");
+define("DATABASE_HOST","localhost");
 
 include_once  __DIR__ . DIRECTORY_SEPARATOR .'tools'. DIRECTORY_SEPARATOR . 'utils.php';
