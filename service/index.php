@@ -13,7 +13,8 @@
  */
 
 
-require_once 'MockAPIResponse.php';
+require_once 'APIResponse.php';
+require_once 'config.php';
 
 
 use Phalcon\Loader;
@@ -23,8 +24,8 @@ use Phalcon\Db\Adapter\Pdo\Mysql as PdoMysql;
 use Phalcon\Http\Response;
 
 $loader = new Loader();
-$response = new \MockAPI\Response\MockAPIResponse();
-
+$response = new RubixTraderRacingWebService\Response\APIResponse();
+$utils  = new RubixTraderRacingWebService\Tools\Utils();
 
 $loader->registerDirs(
 	array(
@@ -35,12 +36,12 @@ $loader->registerDirs(
 $di = new FactoryDefault();///
 // Set up the database service
 $di->set('db', function () {
-	return new PdoMysql(
+	return new\Phalcon\Db\Adapter\Pdo\Mysql(
 		array(
-			"host"     => "localhost",
-			"username" => "root",
-			"password" => "password",
-			"dbname"   => "rubixtrader_racing"
+			"host"     => DATABASE_HOST,
+			"username" => DATABASE_USER,
+			"password" => DATABASE_PASSWORD,
+			"dbname"   => DATABASE_NAME
 		)
 	);
 });
@@ -385,21 +386,47 @@ $app->get('/price/sources', function($event_id) use ($app, $response) {
 });
 
 
-$app->put('/feed/config', function() use ($app, $response) {
+$app->put('/feed/config', function() use ($app, $response, $utils) {
 
 	$code = 200;
 	$responseText = 'ok';
 	$requestdata = $app->request->getJsonRawBody(true);
+
+	$deleteVenueAliasSQL = "DELETE  FROM venueAlias WHERE  feed_id = :feed_id: AND venue_id = :venue_id:";
+	$createNewVenueAliasSQL = "INSERT INTO venueAlias(feed_id,venue_id, name) VALUES(:feed_id:,:venue_id:, :name:)";
+
+	//doing this in a hacky way since phalcon does'not support ON DUPLICATE KEY UPDATE
+	$db = $app->getService('db');
+	$aliasPriorityUpdate = $db->prepare("INSERT INTO feed_venue_priority(feed_id,venue_id, priority)  VALUES(:feed_id, :venue_id, :priority_insert)
+				  						 ON DUPLICATE KEY UPDATE  priority = :priority_update");
+
 	foreach ($requestdata as $row) {
-		$alias = $row['aliases'];
-		$venue_id = isset($row['venue_id']) ?: $row['venue_id'];
 
+		$aliases =   $utils->index_set_strict($row, 'aliases');
+		$venue_id = (int) $utils->index_set_strict($row, 'venue_id');
+		$feed_id =  (int) $utils->index_set_strict($row, 'feed_id');
+		$priority = (int) $utils->index_set_strict($row, 'priority');
 
+		if (empty($venue_id) || empty($feed_id)) {
+			continue;
+		}
 
+		//clean the table
+
+		$deleteResult = $app->modelsManager->executeQuery($deleteVenueAliasSQL, array('feed_id'=> $feed_id, 'venue_id'=> $venue_id));
+
+		//insert the new aliases
+		foreach ($aliases as $alias) {
+			$app->modelsManager->executeQuery($createNewVenueAliasSQL, array('feed_id'=> $feed_id, 'venue_id'=> $venue_id, 'name' => $alias));
+
+		}
+
+		$aliasPriorityUpdate->bindValue(':feed_id', $feed_id, PDO::PARAM_INT);
+		$aliasPriorityUpdate->bindValue(':venue_id', $venue_id, PDO::PARAM_INT);
+		$aliasPriorityUpdate->bindValue(':priority_insert', $priority, PDO::PARAM_INT);
+		$aliasPriorityUpdate->bindValue(':priority_update', $priority, PDO::PARAM_INT);
+		$aliasPriorityUpdate->execute();
 	}
-
-
-
 
 	$data = array('result'=> 'successful');
 	$response->send($code, $responseText, $data);
