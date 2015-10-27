@@ -437,7 +437,7 @@ $app->put('/feed/config', function() use ($app, $response, $utils) {
 /**
  * fetch all racing venues
  */
-$app->get('/api/venues/{sports_id:[0-9]*}', function($sport_id) use ($app, $response) {
+$app->get('/venues/{sports_id:[0-9]*}', function($sport_id) use ($app, $response) {
 	$code = 200;
 	$responseText = 'ok';
 	$data = array();
@@ -457,7 +457,7 @@ $app->get('/api/venues/{sports_id:[0-9]*}', function($sport_id) use ($app, $resp
 /**
 * fetch feed venue settings
 */
-$app->get('/api/feed/venue/{venue_id:[0-9]*}', function($venue_id) use ($app, $response) {
+$app->get('/feed/venue/{venue_id:[0-9]*}', function($venue_id) use ($app, $response) {
 
 	$code = 200;
 	$responseText = 'ok';

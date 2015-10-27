@@ -14,7 +14,7 @@
 
 use Phalcon\Mvc\Model;
 
-class feedVenuePriority {
+class feedVenuePriority extends Model {
 
 	public function getSource()
 	{
