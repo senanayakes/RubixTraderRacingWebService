@@ -405,7 +405,7 @@ $app->put('/feed/config', function() use ($app, $response, $utils) {
 			//hack to get around a issue in phalcon
 
 			if (!is_array($requestData)) {
-				$requestData = json_decode(json_encode($requestData));
+				$requestData = json_decode(json_encode($requestData), true);
 
 			}
 
