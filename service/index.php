@@ -390,47 +390,77 @@ $app->put('/feed/config', function() use ($app, $response, $utils) {
 
 	$code = 200;
 	$responseText = 'ok';
-	$requestdata = $app->request->getJsonRawBody(true);
+	$requestData = $app->request->getJsonRawBody(true);
+	$data = array();
 
-	$deleteVenueAliasSQL = "DELETE  FROM venueAlias WHERE  feed_id = :feed_id: AND venue_id = :venue_id:";
-	$createNewVenueAliasSQL = "INSERT INTO venueAlias(feed_id,venue_id, name) VALUES(:feed_id:,:venue_id:, :name:)";
+	if (empty($requestData)) {
 
-	//doing this in a hacky way since phalcon does'not support ON DUPLICATE KEY UPDATE
-	$db = $app->getService('db');
-	$aliasPriorityUpdate = $db->prepare("INSERT INTO feed_venue_priority(feed_id,venue_id, priority)  VALUES(:feed_id, :venue_id, :priority_insert)
-				  						 ON DUPLICATE KEY UPDATE  priority = :priority_update");
+		$code = 400;
+		$responseText = 'Bad Request';
+		$data['result'] = 'Data Error';
+	} else {
 
-	foreach ($requestdata as $row) {
+		try {
 
-		$aliases =   $utils->index_set_strict($row, 'aliases');
-		$venue_id = (int) $utils->index_set_strict($row, 'venue_id');
-		$feed_id =  (int) $utils->index_set_strict($row, 'feed_id');
-		$priority = (int) $utils->index_set_strict($row, 'priority');
+			//delete enlisting venue aliases
+			$deleteVenueAliasSQL =  "DELETE  FROM venueAlias WHERE  feed_id = :feed_id: AND venue_id = :venue_id:";
+			$insertVenueAliasSQL =  "INSERT INTO venueAlias (feed_id,venue_id,name) VALUES(:feed_id:,:venue_id:,:venue_name:)";
+			$db = $app->getService('db');
 
-		if (empty($venue_id) || empty($feed_id)) {
-			continue;
+
+			foreach ($requestData as $row) {
+
+				$aliases = $utils->index_set_strict($row, 'aliases');
+				$venue_id = (int)$utils->index_set_strict($row, 'venue_id');
+				$feed_id = (int)$utils->index_set_strict($row, 'feed_id');
+				$priority = (int)$utils->index_set_strict($row, 'priority');
+
+				if (empty($venue_id) || empty($feed_id)) {
+					throw new Exception(400,'Data Error');
+				}
+
+				$existingVenueAlias = venueAlias::find(array('feed_id'=> $feed_id, 'venue_id'=> $venue_id));
+
+				if (count($existingVenueAlias) == 1) {
+					$existingVenueAlias->delete();
+				}
+
+
+				foreach ($aliases as $alias) {
+					$app->modelsManager->executeQuery($insertVenueAliasSQL, array('feed_id'=> $feed_id, 'venue_id'=> $venue_id, 'venue_name' => trim($alias)));
+				}
+
+				//doing this in round about way since phalcon adpator does not support on duplicate key updates
+
+				$existingFeedVenuePriority = feedVenuePriority::find(array('feed_id'=> $feed_id, 'venue_id'=> $venue_id));
+
+				if (count($existingFeedVenuePriority) == 1) {
+
+					$updateSQL = "UPDATE feedVenuePriority set priority = :priority: WHERE venue_id =:venue_id: AND feed_id=:feed_id:";
+					$app->modelsManager->executeQuery($updateSQL, array('priority' => $priority, 'venue_id'=> $venue_id, 'feed_id'=> $feed_id));
+
+				} else {
+
+					$insertSQL = "INSERT INTO feedVenuePriority (feed_id,venue_id,priority) VALUES(:feed_id:,:venue_id:,:priority:)";
+					$app->modelsManager->executeQuery($insertSQL, array('feed_id'=> $feed_id, 'venue_id'=> $venue_id, 'priority' => $priority));
+				}
+
+
+			}
+
+			$data = array('result' => 'successful');
+
+		} catch (Exception $e) {
+
+			$code = 400;
+			$responseText = 'Bad Request';
+			$data['result'] = $e->getMessage();
+
 		}
 
-		//clean the table
-
-		$deleteResult = $app->modelsManager->executeQuery($deleteVenueAliasSQL, array('feed_id'=> $feed_id, 'venue_id'=> $venue_id));
-
-		//insert the new aliases
-		foreach ($aliases as $alias) {
-			$app->modelsManager->executeQuery($createNewVenueAliasSQL, array('feed_id'=> $feed_id, 'venue_id'=> $venue_id, 'name' => $alias));
-
-		}
-
-		$aliasPriorityUpdate->bindValue(':feed_id', $feed_id, PDO::PARAM_INT);
-		$aliasPriorityUpdate->bindValue(':venue_id', $venue_id, PDO::PARAM_INT);
-		$aliasPriorityUpdate->bindValue(':priority_insert', $priority, PDO::PARAM_INT);
-		$aliasPriorityUpdate->bindValue(':priority_update', $priority, PDO::PARAM_INT);
-		$aliasPriorityUpdate->execute();
 	}
 
-	$data = array('result'=> 'successful');
 	$response->send($code, $responseText, $data);
-
 });
 
 

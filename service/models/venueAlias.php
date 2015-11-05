@@ -16,9 +16,20 @@ use Phalcon\Mvc\Model;
 
 class venueAlias extends  Model{
 
+	public $venue_alias_id;
+
+	public $feed_id;
+
+	public $venue_id;
+
+	public $name;
+
+
+
 	public function getSource()
 	{
 		return 'venue_alias'; // name of db table here
 	}
+
 
 }
