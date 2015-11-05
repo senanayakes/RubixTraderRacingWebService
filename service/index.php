@@ -415,7 +415,8 @@ $app->put('/feed/config', function() use ($app, $response, $utils) {
 				$feed_id = (int)$utils->index_set_strict($row, 'feed_id');
 				$priority = (int)$utils->index_set_strict($row, 'priority');
 
-				if (!empty($venue_id) || empty(!$feed_id)) {
+
+				if (!empty($venue_id) || empty($feed_id)) {
 					throw new Exception('Data Error');
 				}
 
