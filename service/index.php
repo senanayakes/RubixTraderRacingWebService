@@ -402,6 +402,13 @@ $app->put('/feed/config', function() use ($app, $response, $utils) {
 
 		try {
 
+			//hack to get around a issue in phalcon
+
+			if (!is_array($requestData)) {
+				$requestData = json_decode(json_encode($requestData));
+
+			}
+
 			//delete enlisting venue aliases
 			$deleteVenueAliasSQL =  "DELETE  FROM venueAlias WHERE  feed_id = :feed_id: AND venue_id = :venue_id:";
 			$insertVenueAliasSQL =  "INSERT INTO venueAlias (feed_id,venue_id,name) VALUES(:feed_id:,:venue_id:,:venue_name:)";
