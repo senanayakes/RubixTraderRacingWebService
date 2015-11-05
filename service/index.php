@@ -408,15 +408,18 @@ $app->put('/feed/config', function() use ($app, $response, $utils) {
 			$db = $app->getService('db');
 
 
+
 			foreach ($requestData as $row) {
 
-				$aliases = $utils->index_set_strict($row, 'aliases');
-				$venue_id = (int)$utils->index_set_strict($row, 'venue_id');
-				$feed_id = (int)$utils->index_set_strict($row, 'feed_id');
-				$priority = (int)$utils->index_set_strict($row, 'priority');
+				$aliases = $row['aliases'];
+				$venue_id = $row['venue_id'];
+				$feed_id = $row['feed_id'];
+				$priority = $row['priority'];
 
 
-				if (!empty($venue_id) || empty($feed_id)) {
+
+
+				if (empty($venue_id) || empty($feed_id)) {
 					throw new Exception('Data Error');
 				}
 
