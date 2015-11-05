@@ -28,4 +28,17 @@ class Utils {
 	}
 
 
+
+	public function index_set(array $array, $key, $default = false) {
+
+		if ( is_array($array)) {
+
+			return isset($array[$key]) ? $array[$key]:$default;
+
+		}
+
+		return $default;
+	}
+
+
 }
