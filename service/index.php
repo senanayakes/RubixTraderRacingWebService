@@ -390,11 +390,8 @@ $app->put('/feed/config', function() use ($app, $response, $utils) {
 
 	$code = 200;
 	$responseText = 'ok';
-	$requestData = $app->request->getJsonRawBody(true);
+	$requestData = json_decode($app->request->getRawBody(), true);
 	$data = array();
-
-	$requestData = json_decode(json_encode($requestData), true);
-
 
 
 	if (empty($requestData)) {
