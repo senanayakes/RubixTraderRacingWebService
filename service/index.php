@@ -390,17 +390,20 @@ $app->put('/feed/config', function() use ($app, $response, $utils) {
 
 	$code = 200;
 	$responseText = 'ok';
-	$requestData = $app->request->getJsonRawBody(true);
+	$requestData = json_decode($app->request->getRawBody(), true);
 	$data = array();
+
 
 	if (empty($requestData)) {
 
 		$code = 400;
 		$responseText = 'Bad Request';
 		$data['result'] = 'Data Error';
+
 	} else {
 
 		try {
+
 
 			//delete enlisting venue aliases
 			$deleteVenueAliasSQL =  "DELETE  FROM venueAlias WHERE  feed_id = :feed_id: AND venue_id = :venue_id:";
@@ -408,15 +411,16 @@ $app->put('/feed/config', function() use ($app, $response, $utils) {
 			$db = $app->getService('db');
 
 
+
 			foreach ($requestData as $row) {
 
-				$aliases = $utils->index_set_strict($row, 'aliases');
-				$venue_id = (int)$utils->index_set_strict($row, 'venue_id');
-				$feed_id = (int)$utils->index_set_strict($row, 'feed_id');
-				$priority = (int)$utils->index_set_strict($row, 'priority');
+				$aliases =  $utils->index_set($row, 'aliases');
+				$venue_id = (int) $utils->index_set($row, 'venue_id');
+				$feed_id =  (int) $utils->index_set($row, 'feed_id');
+				$priority = (int) $utils->index_set($row, 'priority');
 
 
-				if (!empty($venue_id) || empty($feed_id)) {
+				if (empty($venue_id) || empty($feed_id)) {
 					throw new Exception('Data Error');
 				}
 
