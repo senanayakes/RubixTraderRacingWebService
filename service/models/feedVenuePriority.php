@@ -14,11 +14,14 @@
 
 use Phalcon\Mvc\Model;
 
-class feedVenuePriority {
+class feedVenuePriority extends Model {
 
 	public function getSource()
 	{
 		return 'feed_venue_priority'; // name of db table here
 	}
+
+
+
 
 }
